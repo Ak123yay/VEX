@@ -54,8 +54,8 @@ void initialize() {
 
   // Configure your chassis controls
   chassis.opcontrol_curve_buttons_toggle(false);  // Disabled to avoid conflicts with piston button controls
-  chassis.opcontrol_drive_activebrake_set(3.25);   // Sets the active brake kP. We recommend ~2.  0 will disable.
-  chassis.opcontrol_curve_default_set(0.65, 0.65);  // Exponential curve for smoother control (0.0 = linear, higher = more curved)
+  chassis.opcontrol_drive_activebrake_set(2);   // Sets the active brake kP. We recommend ~2.  0 will disable.
+  chassis.opcontrol_curve_default_set(0.45, 0.45);  // Exponential curve for smoother control (0.0 = linear, higher = more curved)
 
 
   // Set the drive to your own constants from autons.cpp!
@@ -264,7 +264,6 @@ void ez_template_extras() {
 
 
     // Trigger the selected autonomous routine
-    // amazonq-ignore-next-line
     if (master.get_digital(DIGITAL_B) && master.get_digital(DIGITAL_A)) {
       pros::motor_brake_mode_e_t preference = chassis.drive_brake_get();
       autonomous();
