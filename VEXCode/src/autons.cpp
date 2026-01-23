@@ -471,6 +471,9 @@ void measure_offsets() {
 void autonomous_left_side() {
   printf("=== LEFT SIDE AUTONOMOUS STARTED ===\n");
  
+  // Reset all subsystems
+
+
   // Start intake motors
   intake_motor_a.move(INTAKE_SPEED);
   pros::delay(100);
@@ -488,16 +491,16 @@ void autonomous_left_side() {
 
 
   // Drive to scoring position
-  chassis.pid_drive_set(20.125_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(32, 40, true);
   chassis.pid_wait();
   printf("Drive to goal: SUCCESS\n");
 
 
-  chassis.pid_turn_set(-110_deg, TURN_SPEED);
+  chassis.pid_turn_set(-146_deg, TURN_SPEED);
   chassis.pid_wait();
 
 
-  chassis.pid_drive_set(37_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(50_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
 
@@ -505,13 +508,17 @@ void autonomous_left_side() {
   chassis.pid_wait();
 
 
-  chassis.pid_drive_set(8_in, DRIVE_SPEED, true);
+  wall.set_value(true);
+
+
+  chassis.pid_drive_set(23_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   pros::delay(3000);  // Extra 3000ms after movement finishes
 
 
   chassis.pid_drive_set(-50_in, DRIVE_SPEED, true);
   chassis.pid_wait();
+  wall.set_value(false);
   intake_motor_b.move(100);
 
 
@@ -523,6 +530,20 @@ void autonomous_left_side_full() {
   printf("=== LEFT SIDE FULL AUTONOMOUS STARTED ===\n");
   // Full autonomous routine for left side
   // Add your full autonomous code here
+
+  intake_motor_a.move(INTAKE_SPEED);
+  pros::delay(100);
+
+  chassis.pid_drive_set(31_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(-90_deg, TURN_SPEED);
+  chassis.pid_wait();
+
+  wall.set_value(true);
+  chassis.pid_drive_set(20_in, DRIVE_SPEED, true);
+  chassis.pid_wait();
+
   printf("=== LEFT SIDE FULL AUTONOMOUS COMPLETE ===\n");
 }
 
@@ -546,7 +567,7 @@ void autonomous_right_side() {
 
 
   // Drive forward slightly to grab piece
-  chassis.pid_drive_set(2_in, DRIVE_SPEED, false);
+  chassis.pid_drive_set(2_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   printf("Piece intake: SUCCESS\n");
 
@@ -557,27 +578,27 @@ void autonomous_right_side() {
 
 
   // Drive to scoring position
-  chassis.pid_drive_set(20.125_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(32, 40, true);
   chassis.pid_wait();
   printf("Drive to goal: SUCCESS\n");
 
 
-  chassis.pid_turn_set(135_deg, TURN_SPEED);
+  chassis.pid_turn_set(146_deg, TURN_SPEED);
   chassis.pid_wait();
 
 
-  chassis.pid_drive_set(44_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(50_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
 
-  chassis.pid_turn_set(39_deg, TURN_SPEED);
+  chassis.pid_turn_set(180_deg, TURN_SPEED);
   chassis.pid_wait();
 
 
   wall.set_value(true);
 
 
-  chassis.pid_drive_set(16_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(23_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   pros::delay(3000);  // Extra 3000ms after movement finishes
 
@@ -586,9 +607,6 @@ void autonomous_right_side() {
   chassis.pid_wait();
   wall.set_value(false);
   intake_motor_b.move(100);
-
-
-
 
   // amazonq-ignore-next-line
   printf("RIGHT SIDE Autonomous Complete!\n");
@@ -608,13 +626,6 @@ void autonomous_right_side_full() {
 ///
 void autonomous_safe() {
   printf("=== SAFE AUTONOMOUS STARTED (FALLBACK) ===\n");
- 
-  // Reset all subsystems
-  chassis.pid_targets_reset();
-  chassis.drive_imu_reset();
-  chassis.drive_sensor_reset();
-  chassis.odom_xyt_set(0_in, 0_in, 0_deg);
-  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);
 
 
   // Start intake
@@ -624,7 +635,7 @@ void autonomous_safe() {
 
 
   // Simple forward drive to score
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(2_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   printf("Score placement: SUCCESS\n");
 
