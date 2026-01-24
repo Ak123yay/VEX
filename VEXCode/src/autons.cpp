@@ -480,7 +480,7 @@ void autonomous_left_side() {
 
 
   // Drive forward slightly to grab piece
-  chassis.pid_drive_set(2_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(2_in, DRIVE_SPEED, false);
   chassis.pid_wait();
   printf("Piece intake: SUCCESS\n");
 
@@ -567,7 +567,7 @@ void autonomous_right_side() {
 
 
   // Drive forward slightly to grab piece
-  chassis.pid_drive_set(2_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(2_in, DRIVE_SPEED, false);
   chassis.pid_wait();
   printf("Piece intake: SUCCESS\n");
 

@@ -225,6 +225,14 @@ void ez_screen_task() {
           screen_print_tracker(chassis.odom_tracker_front, "f", 7);
         }
       }
+      
+      // Motor temperature page
+      if (ez::as::page_blank_is_on(1)) {
+        ez::screen_print("Motor Temps:", 1);
+        ez::screen_print("Intake A: " + std::to_string((int)intake_motor_a.get_temperature()) + "C", 2);
+        ez::screen_print("Intake B: " + std::to_string((int)intake_motor_b.get_temperature()) + "C", 3);
+        ez::screen_print("Battery: " + std::to_string((int)pros::battery::get_capacity()) + "%", 7);
+      }
     }
 
 
