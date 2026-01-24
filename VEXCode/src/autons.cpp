@@ -661,7 +661,6 @@ void autonomous_skills() {
   // Start intake
   // amazonq-ignore-next-line
   intake_motor_a.move(INTAKE_SPEED);
-  intake_motor_b.move(INTAKE_SPEED);
 
 
   // Drive and collect multiple pieces
