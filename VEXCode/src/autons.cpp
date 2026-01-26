@@ -801,11 +801,11 @@ void autonomous_skills() {
   pros::delay(2600);
   stop_intakes();
   pros::delay(100);
+  wall_extend();
 
   // back out and get next matchload
   chassis.pid_drive_set(27.713, 65);
   pros::delay(100);
-  wall_extend();
   pros::delay(1000);
   match_load_procedure(3, 0.9); //matchload procedure
 
@@ -827,6 +827,31 @@ void autonomous_skills() {
   // reposition to other side / mid field
   chassis.pid_turn_set(180, 105);
   pros::delay(500);
+
+  
+  // chassis.pid_drive_set(20, 85);
+  // chassis.pid_wait();
+  // chassis.pid_turn_set(90, 105);
+  // chassis.pid_wait();
+  // chassis.pid_drive_set(25, 85);
+  // chassis.pid_wait();
+  // chassis.pid_turn_set(180, 105);
+  // chassis.pid_wait();
+  // store_start();
+  // pros::delay(500);
+  // chassis.pid_drive_set(57.162, 45);
+  // chassis.pid_wait();
+  // store_stop();
+  // pros::delay(300);
+  // chassis.pid_turn_set(270, 105);
+  // chassis.pid_wait();
+  // chassis.pid_drive_set(14.27, 85);
+  // chassis.pid_wait();   
+  // chassis.pid_turn_set(180, 105);
+  // chassis.pid_wait();
+  // chassis.pid_drive_set(20, 85);
+  // chassis.pid_wait();
+
   chassis.pid_drive_set(97.162, 85); // to between other long goal & matchload
   chassis.pid_wait();
 
