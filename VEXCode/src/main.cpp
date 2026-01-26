@@ -333,20 +333,20 @@ void opcontrol() {
     // Apply intake behavior by priority
     if (r1_intake_state) {
       // Toggle intake (R1) - only motor_a spins
-      intake_motor_a.move(100);
-      intake_motor_b.move(0);
+      intake_motor_a.move(127);
+      intake_motor_b.move(-30);
     } else if (master.get_digital(DIGITAL_R2)) {
       // Manual intake (hold) - both forward
-      intake_motor_a.move(100);
-      intake_motor_b.move(100);
+      intake_motor_a.move(127);
+      intake_motor_b.move(127);
     } else if (master.get_digital(DIGITAL_L1)) {
       // Intake reverse - both backward
-      intake_motor_a.move(-100);
-      intake_motor_b.move(-100);
+      intake_motor_a.move(-127);
+      intake_motor_b.move(-127);
     } else if (master.get_digital(DIGITAL_L2)) {
       // Eject - motor_a forward, motor_b reverse
-      intake_motor_a.move(100);
-      intake_motor_b.move(-100);
+      intake_motor_a.move(127);
+      intake_motor_b.move(-127);
     } else {
       // Nothing active - stop intake
       intake_motor_a.move(0);

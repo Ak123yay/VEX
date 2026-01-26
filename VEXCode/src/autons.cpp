@@ -14,12 +14,11 @@ const int SWING_SPEED = 110;
 
 
 // Intake speeds
-const int INTAKE_SPEED = 100;
+const int INTAKE_SPEED = 127;
 
 
-const int INTAKE_EJECT_SPEED_A = 100;
-const int INTAKE_EJECT_SPEED_B = 100;
-
+const int INTAKE_EJECT_SPEED_A = 127;
+const int INTAKE_EJECT_SPEED_B = 127;
 
 ///
 // Constants
@@ -64,6 +63,83 @@ void default_constants() {
   chassis.pid_angle_behavior_set(ez::shortest);  // Changes the default behavior for turning, this defaults it to the shortest path there
 }
 
+
+// ---------- helper functions (put near top of your .cpp) ----------
+inline void store_start() {
+  // spin only intake A to "store" a ball (your request)
+  intake_motor_a.move(127);
+  intake_motor_b.move(-30);
+}
+inline void store_stop() {
+  intake_motor_a.move(0);
+}
+inline void score_full() {
+  // both intakes to score (left negative, right positive like original)
+  intake_motor_a.move(127);
+  intake_motor_b.move(127);
+}
+inline void score_half() {
+  intake_motor_a.move(127);
+  intake_motor_b.move(80);
+}
+inline void stop_intakes() {
+  intake_motor_a.move(0);
+  intake_motor_b.move(0);
+}
+inline void wall_extend()  { wall.set_value(true);  }
+inline void wall_retract() { wall.set_value(false); }
+
+
+void match_load_procedure(int times, double wiggle_amount) {
+  // Extend wall to grab matchload (per field image)
+  wall.set_value(true);
+
+  // STORE mode: intake motor A only
+  intake_motor_a.move(-127);
+  intake_motor_b.move(0);
+
+  for (int i = 0; i < times; i++) {
+    chassis.pid_drive_set(-(wiggle_amount - 0.3), 40);
+    pros::delay(300);
+    chassis.pid_drive_set(wiggle_amount, 40);
+    pros::delay(300);
+  }
+
+  // Wait for balls to fully feed
+  pros::delay(2000 - times * 600);
+
+  // Stop intake after matchload
+  intake_motor_a.move(0);
+}
+
+float get_heading(float current_x, float current_y, float dest_x, float dest_y) {
+  float delta_x = dest_x - current_x;
+  float delta_y = dest_y - current_y;
+
+  if (delta_x < 0.000001 && delta_x > -0.000001) {
+    throw std::invalid_argument("dest_x - current_x cannot = 0");
+  }
+
+  float alpha = atan(delta_y / delta_x) * 180 / acos(-1);
+  
+  float theta;
+
+  if (delta_x > 0) {
+    theta = 90 - alpha;
+  }
+  if (delta_x < 0) {
+    theta = 270 - alpha;
+  }
+  
+  return theta;
+}
+
+/**
+ * @brief gets distance between current position and desired position of bot
+ */
+float get_distance(float current_x, float current_y, float dest_x, float dest_y) {
+  return sqrt(pow(dest_x - current_x, 2) + pow(dest_y - current_y, 2));
+}
 
 ///
 // Drive Example
@@ -652,84 +728,6 @@ void autonomous_safe() {
 // SKILLS AUTONOMOUS - Optimized for maximum points
 /// Note: Use this for skills challenges
 ///
-// ---------- helper functions (put near top of your .cpp) ----------
-inline void store_start() {
-  // spin only intake A to "store" a ball (your request)
-  intake_motor_a.move(-127);
-  intake_motor_b.move(0);
-}
-inline void store_stop() {
-  intake_motor_a.move(0);
-}
-inline void score_full() {
-  // both intakes to score (left negative, right positive like original)
-  intake_motor_a.move(-127);
-  intake_motor_b.move(127);
-}
-inline void score_half() {
-  intake_motor_a.move(-127);
-  intake_motor_b.move(80);
-}
-inline void stop_intakes() {
-  intake_motor_a.move(0);
-  intake_motor_b.move(0);
-}
-inline void wall_extend()  { wall.set_value(true);  }
-inline void wall_retract() { wall.set_value(false); }
-
-
-void match_load_procedure(int times, double wiggle_amount) {
-  // Extend wall to grab matchload (per field image)
-  wall.set_value(true);
-
-  // STORE mode: intake motor A only
-  intake_motor_a.move(-127);
-  intake_motor_b.move(0);
-
-  for (int i = 0; i < times; i++) {
-    chassis.pid_drive_set(-(wiggle_amount - 0.3), 40);
-    pros::delay(300);
-    chassis.pid_drive_set(wiggle_amount, 40);
-    pros::delay(300);
-  }
-
-  // Wait for balls to fully feed
-  pros::delay(2000 - times * 600);
-
-  // Stop intake after matchload
-  intake_motor_a.move(0);
-}
-
-float get_heading(float current_x, float current_y, float dest_x, float dest_y) {
-  float delta_x = dest_x - current_x;
-  float delta_y = dest_y - current_y;
-
-  if (delta_x < 0.000001 && delta_x > -0.000001) {
-    throw std::invalid_argument("dest_x - current_x cannot = 0");
-  }
-
-  float alpha = atan(delta_y / delta_x) * 180 / acos(-1);
-  
-  float theta;
-
-  if (delta_x > 0) {
-    theta = 90 - alpha;
-  }
-  if (delta_x < 0) {
-    theta = 270 - alpha;
-  }
-  
-  return theta;
-}
-
-/**
- * @brief gets distance between current position and desired position of bot
- */
-float get_distance(float current_x, float current_y, float dest_x, float dest_y) {
-  return sqrt(pow(dest_x - current_x, 2) + pow(dest_y - current_y, 2));
-}
-
-
 
 // ---------- skills routine (main) ----------
 void autonomous_skills() {
