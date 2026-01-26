@@ -510,7 +510,7 @@ void autonomous_left_side() {
   wall.set_value(true);
 
 
-  chassis.pid_drive_set(23_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(5_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   pros::delay(3000);  // Extra 3000ms after movement finishes
 
@@ -597,7 +597,7 @@ void autonomous_right_side() {
   wall.set_value(true);
 
 
-  chassis.pid_drive_set(23_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(5_in, DRIVE_SPEED, true);
   chassis.pid_wait();
   pros::delay(3000);  // Extra 3000ms after movement finishes
 
@@ -652,38 +652,304 @@ void autonomous_safe() {
 // SKILLS AUTONOMOUS - Optimized for maximum points
 /// Note: Use this for skills challenges
 ///
-void autonomous_skills() {
-  printf("=== SKILLS AUTONOMOUS STARTED ===\n");
- 
- 
-
-
-  // Start intake
-  // amazonq-ignore-next-line
-  intake_motor_a.move(INTAKE_SPEED);
-
-
-  // Drive and collect multiple pieces
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
-  chassis.pid_wait();
-  printf("Piece 1 collected\n");
-
-
-  // Turn and continue
-  chassis.pid_turn_set(90_deg, TURN_SPEED);
-  chassis.pid_wait();
-
-
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
-  chassis.pid_wait();
-  printf("Piece 2 collected\n");
-
-
-  // Stop intake
+// ---------- helper functions (put near top of your .cpp) ----------
+inline void store_start() {
+  // spin only intake A to "store" a ball (your request)
+  intake_motor_a.move(-127);
+  intake_motor_b.move(0);
+}
+inline void store_stop() {
+  intake_motor_a.move(0);
+}
+inline void score_full() {
+  // both intakes to score (left negative, right positive like original)
+  intake_motor_a.move(-127);
+  intake_motor_b.move(127);
+}
+inline void score_half() {
+  intake_motor_a.move(-127);
+  intake_motor_b.move(80);
+}
+inline void stop_intakes() {
   intake_motor_a.move(0);
   intake_motor_b.move(0);
+}
+inline void wall_extend()  { wall.set_value(true);  }
+inline void wall_retract() { wall.set_value(false); }
 
 
-  printf("=== SKILLS AUTONOMOUS COMPLETE ===\n");
+void match_load_procedure(int times, double wiggle_amount) {
+  // Extend wall to grab matchload (per field image)
+  wall.set_value(true);
+
+  // STORE mode: intake motor A only
+  intake_motor_a.move(-127);
+  intake_motor_b.move(0);
+
+  for (int i = 0; i < times; i++) {
+    chassis.pid_drive_set(-(wiggle_amount - 0.3), 40);
+    pros::delay(300);
+    chassis.pid_drive_set(wiggle_amount, 40);
+    pros::delay(300);
+  }
+
+  // Wait for balls to fully feed
+  pros::delay(2000 - times * 600);
+
+  // Stop intake after matchload
+  intake_motor_a.move(0);
 }
 
+float get_heading(float current_x, float current_y, float dest_x, float dest_y) {
+  float delta_x = dest_x - current_x;
+  float delta_y = dest_y - current_y;
+
+  if (delta_x < 0.000001 && delta_x > -0.000001) {
+    throw std::invalid_argument("dest_x - current_x cannot = 0");
+  }
+
+  float alpha = atan(delta_y / delta_x) * 180 / acos(-1);
+  
+  float theta;
+
+  if (delta_x > 0) {
+    theta = 90 - alpha;
+  }
+  if (delta_x < 0) {
+    theta = 270 - alpha;
+  }
+  
+  return theta;
+}
+
+/**
+ * @brief gets distance between current position and desired position of bot
+ */
+float get_distance(float current_x, float current_y, float dest_x, float dest_y) {
+  return sqrt(pow(dest_x - current_x, 2) + pow(dest_y - current_y, 2));
+}
+
+
+
+// ---------- skills routine (main) ----------
+void autonomous_skills() {
+  // Start facing 0 degrees (audience-facing orientation per image)
+  chassis.drive_angle_set(0_deg);
+
+  // ------------------ 1) Go to first matchload (left side) ------------------
+  chassis.pid_drive_set(32.661, 70); // drive till in front of match load
+  chassis.pid_wait();
+
+  // turn to face matchload: use shorter route (-90 instead of 270)
+  chassis.pid_turn_set(-90_deg, 105);
+  pros::delay(500);
+
+  // extend wall to grab matchload (piston extend)
+  wall_extend();
+  pros::delay(300);
+
+  // drive into matchload, ensure wall is extended
+  chassis.pid_drive_set(11.55, 65);
+  wall_extend();
+  pros::delay(1000);   // let robot settle into matchload
+
+  match_load_procedure(3, 0.9);
+
+  // back out of matchload, retract piston
+  chassis.pid_drive_set(-12, 75);
+  chassis.pid_wait();
+  wall_retract();
+
+
+  // ensure intakes stopped
+  stop_intakes();
+
+  // ------------------ 2) Drive through alley to long goal #1 ------------------
+  // face alley to long goal using your heading helper
+  chassis.pid_turn_set(get_heading(-46.175, 45.833, -31.371, 58.597) + 180, 60);
+  pros::delay(500);
+
+  // drive into alley (distance helper)
+  chassis.pid_drive_set(get_distance(-46.175, 45.833, -31.371, 58.597) * -1, 75);
+  pros::delay(1000);
+
+  // face parallel to long goal (short rotation)
+  chassis.pid_turn_set(-90, 60); // replaced 270 with -90
+  pros::delay(500);
+
+  // cross field to center area
+  chassis.pid_drive_set(-70.43, 90);
+  chassis.pid_wait();
+
+  // orient perpendicular to long goal
+  chassis.pid_turn_set(0, 105);
+  pros::delay(500);
+
+  // move into scoring setup
+  chassis.pid_drive_set(-12.366, 60);
+  chassis.pid_wait();
+
+  // face long goal
+  chassis.pid_turn_set(90, 105);
+  chassis.pid_wait();
+
+  // ------------------ 3) 1st long goal score ------------------
+  chassis.pid_drive_set(-6.279, 60); // drive into long goal
+  chassis.pid_wait();
+
+  // push backward and spin both intakes to score
+  chassis.pid_drive_set(-60, 50);
+  score_full();
+  pros::delay(2600);
+  stop_intakes();
+  pros::delay(100);
+
+  // back out and get next matchload
+  chassis.pid_drive_set(27.713, 65);
+  pros::delay(100);
+  wall_extend();
+  pros::delay(1000);
+  match_load_procedure(3, 0.9); //matchload procedure
+
+  // ------------------ 4) 2nd long goal score ------------------
+  chassis.pid_drive_set(-28.361, 75); // move backwards into long goal
+  pros::delay(500);
+  wall_retract();
+  chassis.pid_wait();
+  pros::delay(300);
+
+  chassis.pid_drive_set(-60, 50);
+  score_half(); // lower-power variant used originally
+  pros::delay(2600);
+  stop_intakes();
+
+  chassis.pid_drive_set(14.27, 75); // move out from long goal
+  pros::delay(600);
+
+  // reposition to other side / mid field
+  chassis.pid_turn_set(180, 105);
+  pros::delay(500);
+  chassis.pid_drive_set(97.162, 85); // to between other long goal & matchload
+  chassis.pid_wait();
+
+  // face matchload on other side
+  chassis.pid_turn_set(90, 105);
+  pros::delay(500);
+
+  // go into matchload (other side)
+  chassis.pid_drive_set(15.239, 65);
+  chassis.pid_wait();
+  wall_extend();
+  pros::delay(600);
+
+  // explicit load
+  store_start();
+  pros::delay(1600);
+  store_stop();
+
+  // back out
+  chassis.pid_drive_set(-12.739, 75);
+  chassis.pid_wait();
+  wall_retract();
+  stop_intakes();
+
+  // ------------------ 5) alley to 3rd long goal (other side) ------------------
+  chassis.pid_turn_set(get_heading(45.05, -48.831, 31.371, -59.997) + 180, 60);
+  pros::delay(500);
+
+  chassis.pid_drive_set(get_distance(45.05, -48.831, 31.371, -59.997) * -1, 75);
+  pros::delay(1000);
+
+  // face parallel to long goal (short route)
+  chassis.pid_turn_set(90, 105);
+  pros::delay(500);
+
+  chassis.pid_drive_set(-70.43, 90);
+  chassis.pid_wait();
+
+  chassis.pid_turn_set(180, 105); // perpendicular to long goal
+  pros::delay(500);
+
+  chassis.pid_drive_set(-10.566, 70); // move to setup long goal
+  pros::delay(800);
+
+  // face long goal using -90 instead of 270
+  chassis.pid_turn_set(-90, 105);
+  pros::delay(500);
+
+  // ------------------ 6) 3rd long goal score ------------------
+  chassis.pid_drive_set(-8.279, 70);
+  chassis.pid_wait();
+
+  store_start();
+  pros::delay(300);
+  store_stop();
+
+  chassis.pid_drive_set(-60, 50);
+  score_full();
+  pros::delay(2600);
+  stop_intakes();
+  pros::delay(100);
+
+  // get next matchload
+  chassis.pid_drive_set(27.713, 60);
+  pros::delay(100);
+  wall_extend();
+  pros::delay(800);
+
+  store_start();
+  pros::delay(1600);
+  store_stop();
+
+  // ------------------ 7) 4th long goal score ------------------
+  chassis.pid_drive_set(-28.361, 75); // move backwards into long goal
+  pros::delay(500);
+  wall_retract();
+  chassis.pid_wait();
+
+  store_start();
+  pros::delay(300);
+  store_stop();
+
+  chassis.pid_drive_set(-60, 50);
+  score_half();
+  pros::delay(2600);
+  stop_intakes();
+  pros::delay(100);
+
+  chassis.pid_drive_set(14.27, 75); // drive out from long goal
+  pros::delay(300);
+  pros::delay(300);
+
+  // ------------------ 8) Parking (platform hook) ------------------
+  // normalize long angles to shortest turns
+  chassis.pid_turn_set(-40, 105); // 320 -> -40 (shorter)
+  pros::delay(500);
+  chassis.pid_drive_set(40, 75); // drive to wall as bump/align
+  pros::delay(700);
+
+  chassis.pid_turn_set(-20, 105); // 340 -> -20 (shorter)
+  pros::delay(500);
+  chassis.pid_drive_set(10, 75);
+  pros::delay(500);
+
+  chassis.pid_turn_set(0, 105);
+  pros::delay(500);
+  chassis.pid_drive_set(15, 75); // into park
+  pros::delay(500);
+
+  // extend wall to hook platform
+  wall_extend();
+  pros::delay(150);
+  chassis.pid_drive_set(-6, 75); // back a bit to hook onto platform
+  pros::delay(300);
+  chassis.pid_drive_set(40, 105); // forward into park/fully on platform
+
+  // final small scoring spin while parking (settle balls)
+  intake_motor_a.move(-127);
+  intake_motor_b.move(30);
+  pros::delay(1000);
+
+  wall_retract(); // retract piston at end
+  stop_intakes(); // make sure intakes are off
+}
