@@ -691,6 +691,7 @@ void autonomous_right_side() {
 void autonomous_right_side_full() {
   printf("=== RIGHT SIDE FULL AUTONOMOUS STARTED ===\n");
   // Full autonomous routine for right side
+  chassis.pid_drive_set(31_in, DRIVE_SPEED, true);
   // Add your full autonomous code here
   printf("=== RIGHT SIDE FULL AUTONOMOUS COMPLETE ===\n");
 }

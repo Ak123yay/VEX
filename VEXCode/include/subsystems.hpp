@@ -13,8 +13,8 @@ inline bool p1_state, p2_state, p3_state, p4_state;
 inline bool r1_intake_state = false;
 
 // Intake motors
-inline pros::Motor intake_motor_a(-8);
-inline pros::Motor intake_motor_b(7);
+inline pros::Motor intake_motor_a(11);
+inline pros::Motor intake_motor_b(-20);
 
 // Pneumatic pistons
 inline pros::adi::DigitalOut Middle('A');

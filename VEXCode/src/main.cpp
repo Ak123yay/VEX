@@ -10,11 +10,11 @@
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
-    {1, 2, -3},      // Left Chassis Ports (negative port will reverse it!)
-    {-4, -5, 6},      // Right Chassis Ports (negative port will reverse it!)
+    {9, 7, -5},      // Left Chassis Ports (negative port will reverse it!)
+    {-10, -8, 6},      // Right Chassis Ports (negative port will reverse it!)
 
 
-    9,     // IMU Port
+    2,     // IMU Port
     3.25,   // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
     360);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
@@ -334,7 +334,7 @@ void opcontrol() {
     if (r1_intake_state) {
       // Toggle intake (R1) - only motor_a spins
       intake_motor_a.move(127);
-      intake_motor_b.move(-30);
+      intake_motor_b.move(-20);
     } else if (master.get_digital(DIGITAL_R2)) {
       // Manual intake (hold) - both forward
       intake_motor_a.move(127);
