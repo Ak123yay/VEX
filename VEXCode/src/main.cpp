@@ -10,8 +10,8 @@
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
-    {9, 5, -7},      // Left Chassis Ports (negative port will reverse it!)
-    {-10, -6, 8},      // Right Chassis Ports (negative port will reverse it!)
+    {4, 2, -3},      // Left Chassis Ports (negative port will reverse it!)
+    {-10, -9, 8},      // Right Chassis Ports (negative port will reverse it!)
 
 
     6,     // IMU Port
@@ -55,7 +55,7 @@ void initialize() {
   // Configure your chassis controls
   chassis.opcontrol_curve_buttons_toggle(false);  // Disabled to avoid conflicts with piston button controls
   chassis.opcontrol_drive_activebrake_set(2);   // Sets the active brake kP. We recommend ~2.  0 will disable.
-  chassis.opcontrol_curve_default_set(0.45, 0.45);  // Exponential curve for smoother control (0.0 = linear, higher = more curved)
+  chassis.opcontrol_curve_default_set(0.6, 0.6);  // Exponential curve for smoother control (0.0 = linear, higher = more curved)
 
 
   // Set the drive to your own constants from autons.cpp!
@@ -102,9 +102,9 @@ void initialize() {
   ez::as::initialize();
   master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
   // Initialize piston states from Python pre_autonomous()
-  p1_state = true;   // Middle piston ON
-  p2_state = true;   // Wall piston ON
-  p3_state = false;  // Descore piston OFF
+  p1_state = false;   // Middle piston ON
+  p2_state = false;   // Wall piston ON
+  p3_state = true;  // Descore piston OFF
   p4_state = false;  // Aligner piston OFF
  
   // Set pistons to initial states
