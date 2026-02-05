@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-This is a **VEX Robotics V5** competition robot project for team **67** ("Shrihan Jadigam 67"). The repository contains autonomous and operator control code for a VEX V5 robot, built using the **PROS** (Purdue Robotics Operating System) framework with the **EZ-Template** library for simplified robot control.
+This is a **VEX Robotics V5** competition robot project for team **67**. The repository contains autonomous and operator control code for a VEX V5 robot, built using the **PROS** (Purdue Robotics Operating System) framework with the **EZ-Template** library for simplified robot control.
 
 ### Project Type
 - **Platform**: VEX V5 Brain
@@ -104,7 +104,7 @@ VEX/
 
 ### Prerequisites
 
-⚠️ **CRITICAL BUILD REQUIREMENT**: This project requires the **ARM GCC embedded toolchain** which is **NOT available** in standard CI/GitHub Actions environments.
+⚠️ **CRITICAL BUILD REQUIREMENT**: This project requires the **ARM GCC embedded toolchain** which **must be explicitly installed** in CI/GitHub Actions environments (it is not available by default).
 
 Required tools:
 - `arm-none-eabi-gcc` (ARM cross-compiler)
@@ -140,12 +140,14 @@ make all          # Full build
    - **macOS**: `brew install arm-none-eabi-gcc`
    - **Windows**: Download from [ARM Developer](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm)
    
-2. For CI/CD: This project cannot be built in standard GitHub Actions without custom ARM toolchain installation. Consider:
-   - Using a custom Docker container with ARM tools pre-installed
-   - Installing the toolchain as a CI setup step
-   - Using VEX-specific CI environments if available
+2. For CI/CD: Install the ARM toolchain in your CI workflow. Example for GitHub Actions:
+   ```yaml
+   - name: Install ARM toolchain
+     run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+   ```
+   Or use a pre-configured Docker container with the toolchain included.
 
-**Note**: Building for VEX V5 is primarily done locally and uploaded directly to the robot hardware. Continuous integration is **not typically used** for VEX robotics projects.
+**Note**: Building for VEX V5 is primarily done locally and uploaded directly to the robot hardware. Continuous integration is **not typically used** for VEX robotics projects, but can be configured if desired.
 
 ## Code Style & Conventions
 
@@ -270,7 +272,7 @@ To test changes:
 ## Important Notes for AI Coding Agents
 
 ### What NOT to Do
-1. ❌ **Do NOT try to build this project in CI without ARM toolchain** - it will fail with `arm-none-eabi-g++: not found`
+1. ❌ **Do NOT try to build this project in CI without installing ARM toolchain first** - it will fail with `arm-none-eabi-g++: not found`
 2. ❌ **Do NOT add automated testing infrastructure** - VEX projects are tested on physical hardware
 3. ❌ **Do NOT modify firmware libraries** - these are pre-compiled and project-specific
 4. ❌ **Do NOT change the C++ standard** - VEX V5 requires C++20
@@ -315,7 +317,7 @@ This robot participates in VEX V5 robotics competitions. Key considerations:
 
 When working on this repository, remember:
 - This is embedded robotics code for VEX V5 hardware
-- Building requires ARM GCC toolchain (not available in standard CI)
+- Building requires ARM GCC toolchain (must be installed explicitly in CI environments)
 - Code is tested on physical robot hardware, not through automated tests
 - EZ-Template provides high-level control abstractions
 - PID constants are carefully tuned for this specific robot configuration
