@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-This is a **VEX Robotics V5** competition robot project for team **67**. The repository contains autonomous and operator control code for a VEX V5 robot, built using the **PROS** (Purdue Robotics Operating System) framework with the **EZ-Template** library for simplified robot control.
+This is a **VEX Robotics V5** competition robot project for **team 67**. The repository contains autonomous and operator control code for a VEX V5 robot, built using the **PROS** (Purdue Robotics Operating System) framework with the **EZ-Template** library for simplified robot control.
 
 ### Project Type
 - **Platform**: VEX V5 Brain
@@ -104,7 +104,7 @@ VEX/
 
 ### Prerequisites
 
-⚠️ **CRITICAL BUILD REQUIREMENT**: This project requires the **ARM GCC embedded toolchain** which **must be explicitly installed** in CI/GitHub Actions environments (it is not available by default).
+⚠️ **CRITICAL BUILD REQUIREMENT**: This project requires the **ARM GCC embedded toolchain** which is **not pre-installed** in standard CI/GitHub Actions environments and requires explicit installation.
 
 Required tools:
 - `arm-none-eabi-gcc` (ARM cross-compiler)
@@ -249,11 +249,15 @@ make all          # Full build
 - `chassis.pid_odom_set({{x1, y1}, {x2, y2}, ...}, speed)` - Pure pursuit path
 
 ### Units (from OkapiLib)
-Use `_in`, `_deg`, `_ms` literals:
+Use `_in`, `_deg` literals for chassis movements (OkapiLib provides these):
 ```cpp
 chassis.pid_drive_set(24_in, 110);     // 24 inches
 chassis.pid_turn_set(90_deg, 90);      // 90 degrees
-pros::delay(500_ms);                    // 500 milliseconds
+```
+
+Note: For delays, use plain integers (milliseconds):
+```cpp
+pros::delay(500);  // 500 milliseconds
 ```
 
 ## Testing
